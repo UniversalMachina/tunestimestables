@@ -38,8 +38,8 @@ const GameOne: React.FC = () => {
 
     if (isRunning) {
       intervalId = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
-      }, 1000);
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
     }
 
     return () => {
@@ -49,15 +49,15 @@ const GameOne: React.FC = () => {
     };
   }, [isRunning]);
 
-  const formatTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
+  const formatTime = (milliseconds: number): string => {
+    const minutes = Math.floor(milliseconds / 60000);
+    const seconds = Math.floor((milliseconds % 60000) / 1000);
+    const ms = Math.floor((milliseconds % 1000) / 10);
 
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
       2,
       "0"
-    )}:${String(remainingSeconds).padStart(2, "0")}`;
+    )}.${String(ms).padStart(2, "0")}`;
   };
 
   const handleStart = () => {
@@ -128,13 +128,13 @@ const GameOne: React.FC = () => {
         <div className="flex gap-12 mt-12">
           <button
             onClick={handleStart}
-            className="bg-yellow-400 hover:bg-yellow-500 text-black px-24 py-8 rounded-xl text-5xl font-bold"
+            className="bg-yellow-400 hover:bg-yellow-500 text-black px-24 py-8 rounded-xl text-5xl font-bold border-4 border-black"
           >
             Start
           </button>
           <button
             onClick={handleStop}
-            className="bg-red-600 hover:bg-red-700 text-white px-24 py-8 rounded-xl text-5xl font-bold"
+            className="bg-red-600 hover:bg-red-700 text-white px-24 py-8 rounded-xl text-5xl font-bold border-4 border-black"
           >
             Stop
           </button>
