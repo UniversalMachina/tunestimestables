@@ -13,6 +13,8 @@ const GameFour: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
   const [currentAnswer, setCurrentAnswer] = useState<string>("");
+  const [userAnswers, setUserAnswers] = useState<string[]>([]);
+  const [attemptCount, setAttemptCount] = useState<number>(0);
 
   const questions = [
     { question: "9 x 5", answer: "45" },
@@ -88,9 +90,32 @@ const GameFour: React.FC = () => {
   };
 
   const handleAnswerSubmit = () => {
+    const newUserAnswers = [...userAnswers];
+    newUserAnswers[currentQuestionIndex] = currentAnswer;
+    setUserAnswers(newUserAnswers);
+
     if (currentAnswer === questions[currentQuestionIndex].answer) {
       setScore((prev) => prev + 1);
     }
+
+    const newAttemptCount = attemptCount + 1;
+    setAttemptCount(newAttemptCount);
+
+    if (newAttemptCount === 10) {
+      localStorage.setItem(
+        "gameResults",
+        JSON.stringify({
+          questions: questions,
+          userAnswers: [...newUserAnswers, currentAnswer],
+          score:
+            score +
+            (currentAnswer === questions[currentQuestionIndex].answer ? 1 : 0),
+        })
+      );
+      router.push("/game_four/results");
+      return;
+    }
+
     setCurrentAnswer("");
     setCurrentQuestionIndex((prev) => (prev + 1) % questions.length);
   };
@@ -157,7 +182,7 @@ const GameFour: React.FC = () => {
             Start
           </button>
           <div className="text-4xl font-bold border-4 border-black rounded-xl px-8 py-6 bg-white">
-            Score: {score}/10
+            Attempts: {attemptCount}/10
           </div>
         </div>
         <div className="flex flex-col items-center gap-4 mt-6">
@@ -172,10 +197,14 @@ const GameFour: React.FC = () => {
               onKeyPress={handleKeyPress}
               className="border-4 border-black rounded-xl py-4 text-center text-4xl w-[250px]"
               placeholder="Type here"
+              disabled={!isRunning}
             />
             <button
               onClick={handleAnswerSubmit}
-              className="bg-yellow-400 hover:bg-yellow-500 text-black p-2 rounded-xl border-4 border-black"
+              className={`${
+                isRunning ? "bg-yellow-400 hover:bg-yellow-500" : "bg-gray-400"
+              } text-black p-2 rounded-xl border-4 border-black`}
+              disabled={!isRunning}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
