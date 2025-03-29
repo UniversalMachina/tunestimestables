@@ -122,7 +122,7 @@ const GameOne: React.FC = () => {
             className="object-contain"
           />
         </div>
-        <div className="text-8xl font-mono border-8 rounded-lg p-8 w-[64rem] text-center mt-12">
+        <div className="text-8xl font-mono border-8 border-black rounded-2xl p-8 w-[64rem] text-center mt-12">
           {formatTime(time)}
         </div>
         <div className="flex gap-12 mt-12">
