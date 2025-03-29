@@ -16,11 +16,20 @@ const GameFour: React.FC = () => {
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [attemptCount, setAttemptCount] = useState<number>(0);
 
-  const questions = [
-    { question: "9 x 5", answer: "45" },
-    { question: "3 x 7", answer: "21" },
-    // Add more questions as needed
-  ];
+  const generateQuestion = () => {
+    const num1 = Math.floor(Math.random() * 12) + 1; // Random number 1-12
+    const num2 = Math.floor(Math.random() * 12) + 1; // Random number 1-12
+    return {
+      question: `${num1} x ${num2}`,
+      answer: (num1 * num2).toString(),
+    };
+  };
+
+  const [questions, setQuestions] = useState(() =>
+    Array(20)
+      .fill(null)
+      .map(() => generateQuestion())
+  );
 
   useEffect(() => {
     const startCamera = async () => {
@@ -90,6 +99,8 @@ const GameFour: React.FC = () => {
   };
 
   const handleAnswerSubmit = () => {
+    if (attemptCount >= 10) return;
+
     const newUserAnswers = [...userAnswers];
     newUserAnswers[currentQuestionIndex] = currentAnswer;
     setUserAnswers(newUserAnswers);
@@ -105,11 +116,19 @@ const GameFour: React.FC = () => {
       localStorage.setItem(
         "gameResults",
         JSON.stringify({
-          questions: questions,
-          userAnswers: [...newUserAnswers, currentAnswer],
+          questions: questions.slice(0, 10),
+          userAnswers: newUserAnswers,
           score:
             score +
             (currentAnswer === questions[currentQuestionIndex].answer ? 1 : 0),
+          attemptedQuestions: questions
+            .slice(0, newAttemptCount)
+            .map((q, index) => ({
+              question: q.question,
+              correctAnswer: q.answer,
+              userAnswer: newUserAnswers[index] || "",
+              isCorrect: newUserAnswers[index] === q.answer,
+            })),
         })
       );
       router.push("/game_four/results");
@@ -118,6 +137,10 @@ const GameFour: React.FC = () => {
 
     setCurrentAnswer("");
     setCurrentQuestionIndex((prev) => (prev + 1) % questions.length);
+
+    if (currentQuestionIndex >= questions.length - 2) {
+      setQuestions((prev) => [...prev, generateQuestion()]);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -191,20 +214,28 @@ const GameFour: React.FC = () => {
           </div>
           <div className="flex items-center gap-4">
             <input
-              type="text"
+              type="number"
               value={currentAnswer}
               onChange={(e) => setCurrentAnswer(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleKeyPress(e);
+                } else if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
               className="border-4 border-black rounded-xl py-4 text-center text-4xl w-[250px]"
               placeholder="Type here"
-              disabled={!isRunning}
+              disabled={!isRunning || attemptCount >= 10}
             />
             <button
               onClick={handleAnswerSubmit}
               className={`${
-                isRunning ? "bg-yellow-400 hover:bg-yellow-500" : "bg-gray-400"
+                isRunning && attemptCount < 10
+                  ? "bg-yellow-400 hover:bg-yellow-500"
+                  : "bg-gray-400"
               } text-black p-2 rounded-xl border-4 border-black`}
-              disabled={!isRunning}
+              disabled={!isRunning || attemptCount >= 10}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
